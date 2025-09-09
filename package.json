@@ -1,9 +1,22 @@
 {
   "name": "superthread-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Superthread API integration",
+  "main": "index.ts",
   "module": "index.ts",
   "type": "module",
+  "bin": {
+    "superthread-mcp": "./index.ts"
+  },
+  "scripts": {
+    "build": "esbuild index.ts --bundle --platform=node --target=node22 --outfile=dist/index.js --format=esm --external:@modelcontextprotocol/sdk --external:express --sourcemap",
+    "dev": "bun run index.ts",
+    "start": "bun run build && node dist/index.js",
+    "test": "curl -f http://localhost:3000/health || echo 'Server not running'"
+  },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
     "esbuild": "^0.25.9",
     "prettier": "^3.6.2"
@@ -13,7 +26,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
-    "zod": "^4.1.5"
+    "express": "^5.1.0",
+    "zod": "^3"
   },
   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
