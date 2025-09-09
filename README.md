@@ -6,66 +6,66 @@ An unofficial Model Context Protocol (MCP) server for integrating with the [Supe
 
 ### User management
 
-[x] get_me - Get information about the current user.
-[x] update_me - Update information about the current user.
-[] get_team_members - Get information about team members.
+- [x] get_me - Get information about the current user.
+- [x] update_me - Update information about the current user.
+- [ ] get_team_members - Get information about team members.
 
 ### Card management
 
-[x] create_card - Create a new card.
-[x] get_card - Get information about a card.
-[] get_assigned_cards - Get cards assigned to a user.
-[x] update_card - Update information about a card.
-[x] delete_card - Delete a card.
-[] archive_card - Archive a card.
+- [x] create_card - Create a new card.
+- [x] get_card - Get information about a card.
+- [ ] get_assigned_cards - Get cards assigned to a user.
+- [x] update_card - Update information about a card.
+- [x] delete_card - Delete a card.
+- [ ] archive_card - Archive a card.
 
 ### Project management
 
-[] create_project - Create a new project.
-[x] get_project - Get information about a project.
-[] list_projects - List projects.
-[] update_project - Update information about a project.
-[] delete_project - Delete a project.
-[] archive_project - Archive a project.
+- [ ] create_project - Create a new project.
+- [x] get_project - Get information about a project.
+- [ ] list_projects - List projects.
+- [ ] update_project - Update information about a project.
+- [ ] delete_project - Delete a project.
+- [ ] archive_project - Archive a project.
 
 ### Pages
 
-[] create_page - Create a new page.
-[] get_page - Get information about a page.
-[] list_pages - List pages.
-[] update_page - Update information about a page.
-[] delete_page - Delete a page.
-[] archive_page - Archive a page.
+- [ ] create_page - Create a new page.
+- [ ] get_page - Get information about a page.
+- [ ] list_pages - List pages.
+- [ ] update_page - Update information about a page.
+- [ ] delete_page - Delete a page.
+- [ ] archive_page - Archive a page.
 
 ### Comments
 
-[] create_comment - Create a new comment.
-[] get_comment - Get information about a comment.
-[] get_replies - Get replies to a comment.
-[] reply_to_comment - Reply to a comment.
-[] edit_comment - Edit a comment.
-[] edit_reply - Edit a reply.
-[] delete_comment - Delete a comment.
-[] delete_reply - Delete a reply.
+- [ ] create_comment - Create a new comment.
+- [ ] get_comment - Get information about a comment.
+- [ ] get_replies - Get replies to a comment.
+- [ ] reply_to_comment - Reply to a comment.
+- [ ] edit_comment - Edit a comment.
+- [ ] edit_reply - Edit a reply.
+- [ ] delete_comment - Delete a comment.
+- [ ] delete_reply - Delete a reply.
 
 ### Board management
 
-[x] create_board - Create a new board.
-[x] get_board - Get information about a board.
-[x] list_boards - List boards.
-[x] update_board - Update information about a board.
-[x] delete_board - Delete a board.
-[] archive_board - Archive a board.
-[] create_status - Create a new status.
-[] update_status - Update information about a status.
+- [x] create_board - Create a new board.
+- [x] get_board - Get information about a board.
+- [x] list_boards - List boards.
+- [x] update_board - Update information about a board.
+- [x] delete_board - Delete a board.
+- [ ] archive_board - Archive a board.
+- [ ] create_status - Create a new status.
+- [ ] update_status - Update information about a status.
 
 ### Spaces management
 
-[] create_space - Create a new space.
-[] get_space - Get information about a space.
-[] list_spaces - List spaces.
-[] update_space - Update information about a space.
-[] delete_space - Delete a space.
+- [ ] create_space - Create a new space.
+- [ ] get_space - Get information about a space.
+- [ ] list_spaces - List spaces.
+- [ ] update_space - Update information about a space.
+- [ ] delete_space - Delete a space.
 
 ### MCP Client Integration
 
