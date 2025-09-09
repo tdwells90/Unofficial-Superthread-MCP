@@ -31,30 +31,6 @@ export async function getMe(token: string) {
   }
 }
 
-export function registerUserTools(server: McpServer, authToken: string) {
-  server.registerTool(
-    'get_me',
-    {
-      title: 'Fetch the current user Information',
-      description:
-        'Fetches detailed information about the current user, including profile details, teams, locale, and other metadata',
-      inputSchema: {},
-    },
-    () => getMe(authToken)
-  )
-
-  server.registerTool(
-    'update_me',
-    {
-      title: 'Update User Information',
-      description:
-        'Updates the current user profile fields such as name, profile image, timezone, and company information',
-      inputSchema: updateMeSchema,
-    },
-    (args) => updateMe(args, authToken)
-  )
-}
-
 export async function getUserTeams(user: User): Promise<string[]> {
   return user?.user?.teams?.map((team: any) => team.id) || []
 }
@@ -90,4 +66,28 @@ export async function updateMe(args: any, token: string) {
       },
     ],
   }
+}
+
+export function registerUserTools(server: McpServer, authToken: string) {
+  server.registerTool(
+    'get_me',
+    {
+      title: 'Fetch the current user Information',
+      description:
+        'Fetches detailed information about the current user, including profile details, teams, locale, and other metadata',
+      inputSchema: {},
+    },
+    () => getMe(authToken)
+  )
+
+  server.registerTool(
+    'update_me',
+    {
+      title: 'Update User Information',
+      description:
+        'Updates the current user profile fields such as name, profile image, timezone, and company information',
+      inputSchema: updateMeSchema,
+    },
+    (args) => updateMe(args, authToken)
+  )
 }
