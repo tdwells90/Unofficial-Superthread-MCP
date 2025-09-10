@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import cors from 'cors'
 import express from 'express'
 import { randomUUID } from 'node:crypto'
 import type { Request, Response } from 'express'
@@ -9,6 +10,15 @@ import { createMCPServer } from './src/server'
 
 const app = express()
 app.use(express.json())
+
+// CORS configuration
+app.use(
+  cors({
+    origin: '*',
+    exposedHeaders: ['Mcp-Session-Id'],
+    allowedHeaders: ['Content-Type', 'mcp-session-id'],
+  })
+)
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
@@ -39,59 +49,65 @@ app.post('/mcp', async (req: Request, res: Response) => {
 
   const token = authHeader.substring(7) // Remove "Bearer " prefix
 
-  try {
-    const sessionId = req.headers['mcp-session-id'] as string | undefined
-    let transport: StreamableHTTPServerTransport
+  console.log('Has token')
 
-    if (sessionId && transports[sessionId]) {
-      // Reuse existing transport
-      transport = transports[sessionId]
-    } else if (!sessionId && isInitializeRequest(req.body)) {
-      // New initialization request
-      transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: () => randomUUID(),
-        onsessioninitialized: (sessionId) => {
-          // Store the transport by session ID
-          transports[sessionId] = transport
-        },
-      })
+  const sessionId = req.headers['mcp-session-id'] as string | undefined
+  let transport: StreamableHTTPServerTransport
 
-      const server = createMCPServer(token)
+  if (sessionId && transports[sessionId]) {
+    // Reuse existing transport
+    transport = transports[sessionId]
+  } else if (!sessionId && isInitializeRequest(req.body)) {
+    // New initialization request
+    transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(),
+      onsessioninitialized: (sessionId) => {
+        // Store the transport by session ID
+        transports[sessionId] = transport
+      },
+    })
 
-      res.on('close', () => {
-        console.log('Request closed')
-        transport.close()
-        if (transport.sessionId) {
-          delete transports[transport.sessionId]
-        }
-        server.close()
-      })
-
-      await server.connect(transport)
-      await transport.handleRequest(req, res, req.body)
+    // Clean up transport when closed
+    transport.onclose = () => {
+      if (transport.sessionId) {
+        delete transports[transport.sessionId]
+      }
     }
-  } catch (error) {
-    console.error('Error handling MCP request:', error)
-    if (!res.headersSent) {
-      res.status(500).json({
-        jsonrpc: '2.0',
-        error: {
-          code: -32603,
-          message: 'Internal server error',
-        },
-        id: null,
-      })
-    }
+
+    const server = createMCPServer(token)
+
+    // Connect to the MCP server
+    await server.connect(transport)
+  } else {
+    // Invalid request
+    res.status(400).json({
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: 'Bad Request: No valid session ID provided',
+      },
+      id: null,
+    })
+    return
   }
+
+  console.log('Handling request')
+
+  // Handle the request
+  await transport.handleRequest(req, res, req.body)
 })
 
 // Reusable handler for GET and DELETE requests
 const handleSessionRequest = async (req: express.Request, res: express.Response) => {
   const sessionId = req.headers['mcp-session-id'] as string | undefined
+  console.log('Handling session request from GET or DELETE')
+
   if (!sessionId || !transports[sessionId]) {
     res.status(400).send('Invalid or missing session ID')
     return
   }
+
+  console.log('Session ID:', sessionId)
 
   const transport = transports[sessionId]
   await transport.handleRequest(req, res)
