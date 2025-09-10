@@ -8,6 +8,7 @@ export function createMCPServer(authToken: string): McpServer {
   const server = new McpServer(
     {
       name: 'superthread-mcp',
+      title: 'Superthread',
       version: '1.0.0',
     },
     {
