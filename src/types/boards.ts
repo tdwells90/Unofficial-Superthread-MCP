@@ -33,6 +33,8 @@ export type Board = {
   tags: Tag[]
   is_watching: boolean
   is_bookmarked: boolean
+  layout: string
+  archived: Archived
 }
 
 export type BoardResponse = {

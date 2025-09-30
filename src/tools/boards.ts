@@ -1,9 +1,29 @@
-import { z } from 'zod'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { z } from 'zod'
 import { apiClient } from '../lib/api-client.js'
 import { search } from '../lib/search'
-import { getUserFromToken, getUserTeams } from './user'
 import type { Board, BoardSearchResult } from '../types/boards'
+import { getUserFromToken, getUserTeams } from './user'
+
+/**
+ * Filters a board object to only include essential fields, omitting heavy/verbose data
+ */
+function filterBoardForCondensedView(board: Board) {
+  return {
+    id: board.id,
+    title: board.title,
+    project_id: board.project_id,
+    team_id: board.team_id,
+    layout: board.layout,
+    icon: board.icon,
+    color: board.color,
+    is_bookmarked: board.is_bookmarked,
+    is_watching: board.is_watching,
+    archived: board.archived,
+    time_created: board.time_created,
+    time_updated: board.time_updated,
+  }
+}
 
 export const createBoardSchema = {
   team_id: z
@@ -107,10 +127,15 @@ export const listBoardsSchema = {
   project_id: z.string().describe('Project ID'),
   bookmarked: z.boolean().optional().describe('Filter for bookmarked boards'),
   archived: z.boolean().optional().describe('Filter for archived boards'),
+  condensed: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe('Return only essential fields (omits lists, members, tags, content, etc.)'),
 }
 
 export async function listBoards(args: any, token: string) {
-  const { team_id, project_id, bookmarked, archived } = args as z.infer<
+  const { team_id, project_id, bookmarked, archived, condensed } = args as z.infer<
     z.ZodObject<typeof listBoardsSchema>
   >
   const params = new URLSearchParams({
@@ -119,7 +144,11 @@ export async function listBoards(args: any, token: string) {
     ...(archived !== undefined && { archived: String(archived) }),
   })
 
-  const boards = await apiClient.makeRequest(`/${team_id}/boards?${params}`, token)
+  const boards = await apiClient.makeRequest(`/${team_id}/boards?${params}`, token, { condensed })
+
+  if (condensed && boards.boards) {
+    boards.boards = boards.boards.map(filterBoardForCondensedView)
+  }
 
   return {
     content: [
@@ -133,13 +162,18 @@ export async function listBoards(args: any, token: string) {
 
 export const getBoardSchema = {
   query: z.string().describe('Board title or identifier to search for'),
+  condensed: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe('Return only essential fields (omits lists, members, tags, content, etc.)'),
 }
 
 /**
  * Fetches detailed information about a specific board by its title or ID (minus the prefix)
  */
 export async function getBoard(args: any, token: string) {
-  const { query } = args as z.infer<z.ZodObject<typeof getBoardSchema>>
+  const { query, condensed } = args as z.infer<z.ZodObject<typeof getBoardSchema>>
 
   const user = await getUserFromToken(token)
   const teamIds = await getUserTeams(user)
@@ -176,15 +210,17 @@ export async function getBoard(args: any, token: string) {
   }
 
   for (const [seenBoard, teamId] of seenBoards) {
-    const board = await apiClient.makeRequest(`/${teamId}/boards/${seenBoard.id}`, token)
+    const board = await apiClient.makeRequest(`/${teamId}/boards/${seenBoard.id}`, token, { condensed })
     allBoards.push(board.board)
   }
+
+  const resultBoards = condensed ? allBoards.map(filterBoardForCondensedView) : allBoards
 
   return {
     content: [
       {
         type: 'text' as const,
-        text: JSON.stringify(allBoards, null, 2),
+        text: JSON.stringify(resultBoards, null, 2),
       },
     ],
   }

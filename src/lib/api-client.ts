@@ -1,22 +1,28 @@
 const BASE_URL = 'https://api.superthread.com/v1'
 
+export interface SuperthreadRequestOptions extends RequestInit {
+  condensed?: boolean
+}
+
 export class SuperthreadAPIClient {
-  async makeRequest(endpoint: string, token: string, options: RequestInit = {}): Promise<any> {
+  async makeRequest(endpoint: string, token: string, options: SuperthreadRequestOptions = {}): Promise<any> {
     if (!token) {
       throw new Error(
         'Authorization token is required. Please provide a valid Superthread Personal Access Token.'
       )
     }
 
+    const { condensed, ...fetchOptions } = options
     const url = `${BASE_URL}${endpoint}`
     const headers = {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(condensed !== undefined && { 'X-Response-Format': condensed ? 'condensed' : 'full' }),
+      ...fetchOptions.headers,
     }
 
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
     })
 
